@@ -920,8 +920,9 @@ if not rows:
 else:
     df = pd.DataFrame(rows).sort_values("rvol", ascending=False)
     main_cols = {
-        "stock": "Stock", "band": "Vol Band", "rvol": "RVOL", "vol_surge": "Vol Surge", "vol_delta": "Vol Delta",
-        "price_chg": "Price Chg %", "spot": "Spot", "ce_wall": "CE Wall", "pe_wall": "PE Wall",
+        "stock": "Stock", "band": "Vol Band", "spot": "Spot", "price_chg": "Price Chg %",
+        "rvol": "RVOL", "vol_surge": "Vol Surge", "vol_delta": "Vol Delta",
+        "ce_wall": "CE Wall", "pe_wall": "PE Wall",
         "ce_iv": "CE IV", "pe_iv": "PE IV",
         "itm_ce_chg": "ITM CE Chg%", "otm_ce_chg": "OTM CE Chg%", "itm_pe_chg": "ITM PE Chg%", "otm_pe_chg": "OTM PE Chg%",
         "ce_strike": "CE Strike (MaxΔOI)", "ce_chg": "CE OI Chg", "ce_chg_pct": "CE OI Chg%",
@@ -945,8 +946,9 @@ else:
 
     styled = main_df.style
     styled = _style_apply(styled, _color_signed,
-                           ["ITM CE Chg%", "OTM CE Chg%", "ITM PE Chg%", "OTM PE Chg%", "Net GEX (Cr)", "PE OI Chg"])
+                           ["ITM CE Chg%", "OTM CE Chg%", "ITM PE Chg%", "OTM PE Chg%", "Net GEX (Cr)"])
     styled = _style_apply(styled, lambda v: "background-color: #F4B7B2", ["CE OI Chg"])
+    styled = _style_apply(styled, lambda v: "background-color: #C6E0B4", ["PE OI Chg"])
     styled = styled.format(precision=2)
     st.dataframe(styled, use_container_width=True, height=min(600, 60 + 35 * len(main_df)))
 
