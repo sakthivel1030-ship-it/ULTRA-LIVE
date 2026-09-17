@@ -1055,8 +1055,8 @@ def run_cycle(qualifying_stocks, symbol_to_key, expiry_cache, prev_close_cache, 
 # (Last Updated, Stock) as row N on the other.
 # ---------------------------------------------------------------------------
 MAIN_HEADERS_ROW = [
-    "Last Updated", "Vol Band", "Stock", "RVOL", "Vol Surge", "Vol Delta",
-    "Price Chg %", "Spot",
+    "Last Updated", "Vol Band", "Stock", "Spot", "Price Chg %",
+    "RVOL", "Vol Surge", "Vol Delta",
     "CE Wall (Max OI)", "PE Wall (Max OI)",
     "CE IV", "PE IV",
     "ITM CE OI Chg %", "OTM CE OI Chg %", "ITM PE OI Chg %", "OTM PE OI Chg %",
@@ -1065,8 +1065,8 @@ MAIN_HEADERS_ROW = [
     "SuperTrend", "Net GEX (Cr)", "GEX Flip", "Squeeze Setup",
 ]
 MAIN_COL_WIDTHS = [
-    18, 10, 14, 8, 10, 10,
-    10, 10,
+    18, 10, 14, 10, 10,
+    8, 10, 10,
     16, 16,
     9, 9,
     12, 12, 12, 12,
@@ -1086,8 +1086,8 @@ DETAILS_HEADERS_ROW = [
 DETAILS_COL_WIDTHS = [18, 14, 12, 12, 10, 10, 10, 10, 10, 12, 10, 12, 10, 12, 10, 12, 12]
 
 MAIN_HEADER_TO_KEY = dict(zip(MAIN_HEADERS_ROW, [
-    "last_updated", "band", "stock", "rvol", "vol_surge", "vol_delta",
-    "price_chg", "spot",
+    "last_updated", "band", "stock", "spot", "price_chg",
+    "rvol", "vol_surge", "vol_delta",
     "ce_wall", "pe_wall",
     "ce_iv", "pe_iv",
     "itm_ce_chg", "otm_ce_chg", "itm_pe_chg", "otm_pe_chg",
@@ -1429,9 +1429,8 @@ def com_resort_sheets(main_sht, details_sht, rows, refreshed_at):
     main_block = []
     for d in combined:
         main_block.append([
-            d.get("last_updated"), d.get("band"), d.get("stock"), d.get("rvol"),
-            _disp(d.get("vol_surge")), d.get("vol_delta"),
-            _disp(d.get("price_chg")), d.get("spot"),
+            d.get("last_updated"), d.get("band"), d.get("stock"), d.get("spot"), _disp(d.get("price_chg")),
+            d.get("rvol"), _disp(d.get("vol_surge")), d.get("vol_delta"),
             _disp(d.get("ce_wall")), _disp(d.get("pe_wall")),
             _disp(d.get("ce_iv")), _disp(d.get("pe_iv")),
             _disp(d.get("itm_ce_chg")), _disp(d.get("otm_ce_chg")),
@@ -1459,10 +1458,16 @@ def com_resort_sheets(main_sht, details_sht, rows, refreshed_at):
         _com_retry(lambda: setattr(ce_chg_range, "NumberFormat", "0"))
         _com_retry(lambda: setattr(ce_chg_range.Interior, "Color", COLOR_OI_DOWN))
 
-        # PE OI Chg (max-OI-change column, PE side): green(+)/red(-) conditional
+        # PE OI Chg (max-OI-change column, PE side): fixed GREEN fill,
+        # no conditional sign-based coloring - mirrors CE OI Chg's fixed
+        # red fill on the other side. Font explicitly reset to plain/
+        # automatic (no bold, no color override) in case a previous
+        # cycle's font styling is still sitting on these cells.
         pe_chg_range = main_sht.Range(main_sht.Cells(first_row, COL_PE_OI_CHG), main_sht.Cells(last_row, COL_PE_OI_CHG))
         _com_retry(lambda: setattr(pe_chg_range, "NumberFormat", "0"))
-        _apply_signed_coloring(main_sht, first_row, last_row, COL_PE_OI_CHG)
+        _com_retry(lambda: setattr(pe_chg_range.Interior, "Color", COLOR_OI_UP))
+        _com_retry(lambda: setattr(pe_chg_range.Font, "Bold", False))
+        _com_retry(lambda: setattr(pe_chg_range.Font, "ColorIndex", -4105))
 
         # Net GEX: bold font color only (green positive / red negative) -
         # sign matters far more than magnitude here, so this mirrors the
